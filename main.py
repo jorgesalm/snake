@@ -1,29 +1,42 @@
-from turtle import Turtle, Screen
-import random
+from turtle import Screen
+from snake import Snake
+from food import Food
+from scoreboard import Scoreboard
+import time
 
 my_screen = Screen()
-tim = []
-my_screen.setup(width=600, height=600)
+snake = Snake()
+food = Food()
+score = Scoreboard()
+
+game_on = True
+
+
+my_screen.setup(height=600, width=600)
 my_screen.bgcolor("black")
-my_screen.title("Snake")
+my_screen.title("Snake Game")
+my_screen.tracer(0)
+my_screen.listen()
 
 
-def body(x):
-    for i in range(0, x):
-        tim.append(Turtle())
-        tim[i].color("red")
 
-def set_pos(x):
-    jumper = 150
-    for y in range(0, x):
+while game_on:
 
-        tim[y].penup()
-        tim[y].goto(-230, jumper*-1)
-        jumper -= 60
+    time.sleep(0.5)
+    my_screen.update()
+    snake.motion_body()
+    my_screen.onkey(key="Left", fun=snake.left_motion)
+    my_screen.onkey(key="Right", fun=snake.right_motion)
+    my_screen.onkey(key="Up", fun=snake.up_motion)
+    my_screen.onkey(key="Down", fun=snake.down_motion)
 
-body(3)
-set_pos(3)
+    if snake.head.distance(food) < 15:
+        food.refresh()
+        score.score += 1
+        score.refresh()
+        snake.extend()
+    if snake.head.xcor() > 280 or snake.head.xcor() < -298 or snake.head.ycor() > 280 or snake.head.ycor() < -298:
+        game_on = False
+        score.game_over()
 
 my_screen.exitonclick()
-
-
