@@ -1,30 +1,66 @@
+import random
 from tkinter import *
+import pandas
+from random import choice
 BACKGROUND_COLOR = "#B1DDC6"
 
+# ------------------------ Remove words ---------------------------------------
+
+try:
+    data = pandas.read_csv("data/word_to_learn.csv")
+except FileNotFoundError:
+    data = pandas.read_csv("data/french_words.csv")
+
+to_learn = data.to_dict(orient="records")
+
+
+# -------------------------- Generate the random words -------------------------
+
+def generate_words():
+
+    global current_card, time_delay
+    my_screen.after_cancel(time_delay)
+    current_card = random.choice(to_learn)
+    my_word = current_card["French"]
+    canvas2.itemconfig(title, text="French", fill="Black")
+    canvas2.itemconfig(word, text=my_word, fill="Black")
+    canvas2.itemconfig(canvas_image, image=ft_img)
+    time_delay = my_screen.after(3000, func=en_word)
+    list1 = current_card["French"]
+    df = pandas.DataFrame(current_card["French"])
+    df.to_csv("data/word_to_learn.csv")
+def en_word():
+
+    en_card = current_card["English"]
+    canvas2.itemconfig(title, text="English", fill="White")
+    canvas2.itemconfig(word, text=en_card, fill="White")
+    canvas2.itemconfig(canvas_image, image=bk_img)
 
 # TODO ----------------------- Setup UI--------------------------
 
 my_screen = Tk()
 my_screen.config(background=BACKGROUND_COLOR, padx=50, pady=50)
 my_screen.title("Flashcard")
+time_delay = my_screen.after(3000, func=en_word)
 canvas2 = Canvas(height=526, width=800)
 ft_img = PhotoImage(file="images/card_front.png")
-canvas2.create_image(400, 263, image=ft_img)
+bk_img = PhotoImage(file="images/card_back.png")
+canvas_image = canvas2.create_image(400, 263, image=ft_img)
 canvas2.config(bg=BACKGROUND_COLOR, highlightthickness=0)
 canvas2.grid(row=0, column=0,columnspan=2)
 
-canvas2.create_text(400, 150, text="Title", font=("Arial", 40, "italic"))
-canvas2.create_text(400, 263, text="Word", font=("Arial", 60, "bold"))
+title = canvas2.create_text(400, 150, text="", font=("Arial", 40, "italic"))
+word = canvas2.create_text(400, 263, text="", font=("Arial", 60, "bold"))
 
 # ---------------- Buttons -------------------------------------
 right_image = PhotoImage(file="images/right.png")
-right_button = Button(image=right_image, highlightthickness=0)
+right_button = Button(image=right_image, highlightthickness=0, command=generate_words)
 right_button.grid(row=1, column=1)
 wrong_image = PhotoImage(file="images/wrong.png")
-wrong_button = Button(image=wrong_image, highlightthickness=0)
+wrong_button = Button(image=wrong_image, highlightthickness=0, command=en_word)
 wrong_button.grid(row=1, column=0)
 
-
+generate_words()
 
 my_screen.mainloop()
 
